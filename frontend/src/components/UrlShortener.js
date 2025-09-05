@@ -5,6 +5,8 @@ function UrlShortener() {
   const [shortUrl, setShortUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [isShortUrlExists, setIsShortUrlExists] = useState(false);
+  const [createdAt, setCreatedAt] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -38,6 +40,8 @@ function UrlShortener() {
 
       const data = await response.json();
       setShortUrl(data.short_url);
+      setIsShortUrlExists(data.is_short_url_exists);
+      setCreatedAt(data.created_at);
     } catch (err) {
       setError(err.message || 'An error occurred while shortening the URL');
     } finally {
@@ -100,21 +104,34 @@ function UrlShortener() {
               onClick={redirectToShortUrl}
               style={{ cursor: 'pointer' }}
               title="Click to redirect"
-              onMouseOver={(e) => {
+              onMouseOver={e => {
                 e.target.setAttribute('title', 'Click to redirect');
                 e.target.style.backgroundColor = '#e0f7fa';
               }}
-              onMouseOut={(e) => {
+              onMouseOut={e => {
                 e.target.style.backgroundColor = 'transparent';
               }}
             />
-            <button 
+            <button
               onClick={copyToClipboard}
               className="copy-btn"
+              type="button"
             >
               Copy
             </button>
           </div>
+          {isShortUrlExists && (
+            <div
+              className="info-message"
+              style={{
+                marginTop: '8px',
+                color: '#888',
+                fontSize: '0.95em'
+              }}
+            >
+              Already generated short URL on {createdAt ? new Date(createdAt + 'Z').toLocaleString() : ''}
+            </div>
+          )}
         </div>
       )}
     </div>

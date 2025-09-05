@@ -1,8 +1,16 @@
 from typing import Optional
 from pydantic import BaseModel
 from app.models.url import UrlType
+from datetime import datetime
 
 
 class URLCreate(BaseModel):
     original_url: str
     url_type: Optional[UrlType] = UrlType.RANDOM
+
+
+class URLResponse(BaseModel):
+    short_url: str
+    original_url: str
+    is_short_url_exists: bool
+    created_at: datetime
