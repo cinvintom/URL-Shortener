@@ -18,16 +18,16 @@ services:
     networks:
       - shortener-network
 
-  # frontend:
-  #   build:
-  #     context: ./frontend
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - "80:80"
-  #   depends_on:
-  #     - backend
-  #   networks:
-  #     - app-network
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - shortener-network
 
   db:
     image: postgres:15-alpine 
@@ -39,11 +39,6 @@ services:
       - postgres_data:/var/lib/postgresql/data
     networks:
       - shortener-network
-
-  # redis:
-  #   image: redis:7-alpine 
-  #   networks:
-  #     - shortener-network
 
 networks:
   shortener-network:
