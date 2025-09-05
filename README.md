@@ -163,7 +163,7 @@ The API returns structured error responses:
 - **Click to Redirect**: Direct access to shortened URLs
 - **API Documentation**: Interactive Swagger/OpenAPI documentation
 
-## �� Design Decisions
+## Design Decisions
 
 ### Backend Architecture
 - **FastAPI**: Chosen for its automatic API documentation, type safety, and high performance
@@ -194,6 +194,10 @@ The application uses Docker Compose with the following services:
 - **frontend**: React application with development server
 - **db**: PostgreSQL database with persistent volume storage
 
+## 📺 Demonstration of Usage
+
+Watch the demonstration on YouTube: [https://youtu.be/6WJfy-os_6U](https://youtu.be/6WJfy-os_6U)
+
 ## 📝 Development Notes
 
 - The backend supports hot-reload during development
@@ -211,4 +215,4 @@ The application uses Docker Compose with the following services:
 
 ## 📄 License
 
-This project is open source and available under the [MIT License](LICENSE).
+This project is open source.
