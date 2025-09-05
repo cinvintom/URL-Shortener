@@ -22,5 +22,5 @@ class UrlMapping(BaseModel):
     __tablename__ = "url_mappings"
 
     original_url = Column(String(2048), index=True)
-    short_url = Column(String(10), unique=True)
+    short_url = Column(String(10), index=True, unique=True)
     url_type = Column(SQLAlchemyEnum(UrlType), default=UrlType.RANDOM)

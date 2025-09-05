@@ -8,10 +8,12 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY ./backend/app /app
-COPY alembic.ini .
-COPY ./alembic /alembic
-ENV PYTHONPATH=/app
+# Copy the entire backend directory to /backend
+COPY ./backend /backend
+# Set PYTHONPATH to include the backend directory
+ENV PYTHONPATH=/backend
 
 EXPOSE 8080
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8080"]
+# Change working directory to backend and run from there
+WORKDIR /backend
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]

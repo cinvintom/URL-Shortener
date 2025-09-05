@@ -35,9 +35,7 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             return v
         
-        # Access attributes directly, as they are populated by BaseSettings
-        print("--------------------------------")
-        print(f"info.data: {info.data}")
+        # Build PostgreSQL connection URI
         return PostgresDsn.build(
             scheme="postgresql",
             username=info.data.get("POSTGRES_USER"),
@@ -46,7 +44,6 @@ class Settings(BaseSettings):
             port=info.data.get("POSTGRES_PORT"),
             path=f"{info.data.get('POSTGRES_DB')}"
         )
-        print("--------------------------------")
     
 
 
