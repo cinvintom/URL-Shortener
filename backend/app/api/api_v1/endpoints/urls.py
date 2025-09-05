@@ -7,6 +7,7 @@ from app.schemas.url import URLCreate
 from app.error_code.common_errors import CommonErrorCode
 from app.error_code.error_manager import error_manager
 from app.services.urls import UrlServices
+from app.core.config import settings
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def create_url(
         url = UrlServices.create_url_mapping(db=db, url_in=url_in)
         return {
             "msg": "URL generated successfully",
-            "short_url": url.short_url,
+            "short_url": f"http://localhost:{settings.BACKEND_PORT}/{url.short_url}",
             "original_url": url.original_url
         }
     except HTTPException as exc:

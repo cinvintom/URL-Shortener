@@ -18,7 +18,7 @@ function UrlShortener() {
     setShortUrl('');
 
     try {
-      const response = await fetch('http://localhost:8080/url-shortener/api/v1/generate', {
+      const response = await fetch(process.env.REACT_APP_API_URL + '/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -48,6 +48,10 @@ function UrlShortener() {
   const copyToClipboard = () => {
     navigator.clipboard.writeText(shortUrl);
     alert('Short URL copied to clipboard!');
+  };
+
+  const redirectToShortUrl = () => {
+    window.open(shortUrl, '_blank');
   };
 
   return (
@@ -93,6 +97,16 @@ function UrlShortener() {
               value={shortUrl}
               readOnly
               className="short-url-input"
+              onClick={redirectToShortUrl}
+              style={{ cursor: 'pointer' }}
+              title="Click to redirect"
+              onMouseOver={(e) => {
+                e.target.setAttribute('title', 'Click to redirect');
+                e.target.style.backgroundColor = '#e0f7fa';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+              }}
             />
             <button 
               onClick={copyToClipboard}

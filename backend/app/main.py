@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from app.core.config import settings
-from app.api.api_v1.api import url_shortener_router
+from app.api.api_v1.api import url_shortener_router, redirect_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -25,6 +25,7 @@ if settings.BACKEND_CORS_ORIGINS:
 
 # Include the API router
 app.include_router(url_shortener_router, prefix=settings.API_V1_STR)
+app.include_router(redirect_router, prefix="")
 
 @app.get("/")
 def read_root():
