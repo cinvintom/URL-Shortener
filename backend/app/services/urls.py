@@ -5,6 +5,8 @@ from app.utils.url_helpers import URLUtils
 from app.crud.url import CRUDUrl
 from app.schemas.url import URLResponse
 from app.core.config import settings
+from app.error_code.common_errors import CommonErrorCode
+from app.error_code.error_manager import error_manager
 
 crud_url = CRUDUrl()
 
@@ -25,6 +27,16 @@ class UrlServices:
         return crud_url.get_url_by_original_url(db=db, original_url=url_in.original_url) is not None
 
     @staticmethod
+    def check_if_custom_url_exists(db: Session, short_url: str) -> None:
+        """
+        Check if the custom URL exists in the database.
+        """
+        if crud_url.get_url_by_short_url(db=db, short_url=short_url) is not None:
+             raise error_manager.error_responder(
+                            status_code=400,
+                            error_code=CommonErrorCode.CUSTOM_URL_ALREADY_EXISTS,
+                        )
+    @staticmethod
     def create_url_mapping(db: Session, url_in: URLCreate) -> URLResponse:
         """
         Create a new URL mapping in the database.
@@ -41,20 +53,33 @@ class UrlServices:
             db_obj = UrlServices.get_url_mapping_by_original_url(
                 db=db, original_url=url_in.original_url
             )
+            if url_in.short_url and url_in.url_type == UrlType.CUSTOM:
+                if db_obj.short_url != url_in.short_url:
+                    UrlServices.check_if_custom_url_exists(
+                            db=db, short_url=url_in.short_url
+                    )
+                    db_obj.short_url = url_in.short_url
+                    crud_url.update_url_mapping(db=db, url_mapping=db_obj)
             short_url_exists = True
         else:
-            while True:
-                short_url = URLUtils.generate_random_short_url()
-                existing_url = db.query(UrlMapping).filter(
-                    UrlMapping.short_url == short_url
-                ).first()
-                if not existing_url:
-                    break
+            if url_in.short_url and url_in.url_type == UrlType.CUSTOM:
+                UrlServices.check_if_custom_url_exists(
+                    db=db, short_url=url_in.short_url
+                )
+                short_url = url_in.short_url
+            else:
+                while True:
+                    short_url = URLUtils.generate_random_short_url()
+                    existing_url = db.query(UrlMapping).filter(
+                        UrlMapping.short_url == short_url
+                    ).first()
+                    if not existing_url:
+                        break
 
             db_url = UrlMapping(
                 original_url=url_in.original_url,
                 short_url=short_url,
-                url_type=UrlType.RANDOM,
+                url_type=url_in.url_type,
             )
             db_obj = crud_url.create_url_mapping(db=db, url_mapping=db_url)
         return URLResponse(
@@ -65,7 +90,7 @@ class UrlServices:
         )
 
     @staticmethod
-    def get_url_mapping(db: Session, short_url: str) -> UrlMapping:
+    def get_url_mapping_by_short_url(db: Session, short_url: str) -> UrlMapping:
         """
         Retrieve a URL mapping from the database by its short URL.
 

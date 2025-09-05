@@ -3,7 +3,7 @@ from typing import Dict
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.schemas.url import URLCreate, URLResponse
+from app.schemas.url import URLCreate, URLResponse, CustomURLAvailabilityResponse
 from app.error_code.common_errors import CommonErrorCode
 from app.error_code.error_manager import error_manager
 from app.services.urls import UrlServices
@@ -26,6 +26,39 @@ def create_url(
     try:
         url = UrlServices.create_url_mapping(db=db, url_in=url_in)
         return url
+    except HTTPException as exc:
+        raise exc
+    except Exception as exc:
+        print(f"An unexpected error occurred: {exc}")
+        raise error_manager.error_responder(
+            status_code=500,
+            error_code=CommonErrorCode.INTERNAL_SERVER_ERROR,
+            error_message=f"An unexpected error occurred: {exc}"
+        )
+
+
+@router.get(
+    "/custom_url/available/{short_url}",
+    response_model=CustomURLAvailabilityResponse,
+    status_code=status.HTTP_200_OK,
+)
+def check_if_custom_url_exists(
+    *,
+    db: Session = Depends(get_db),
+    short_url: str
+) -> CustomURLAvailabilityResponse:
+    """
+    Checks if the provided custom short URL is available.
+
+    Returns:
+        CustomURLAvailabilityResponse: Contains the short_url and its availability status.
+    """
+    try:
+        url = UrlServices.get_url_mapping_by_short_url(db=db, short_url=short_url)
+        return CustomURLAvailabilityResponse(
+            short_url=short_url,
+            is_short_url_available=url is None
+        )
     except HTTPException as exc:
         raise exc
     except Exception as exc:

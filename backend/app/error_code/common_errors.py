@@ -5,6 +5,7 @@ class CommonErrorCode:
     INVALID_URL = 1000
     INTERNAL_SERVER_ERROR = 1001
     SHORT_URL_NOT_FOUND = 1002
+    CUSTOM_URL_ALREADY_EXISTS = 1003
 class CommonErrorCatalog:
     error_mapping = {
         CommonErrorCode.INVALID_URL: {
@@ -21,6 +22,11 @@ class CommonErrorCatalog:
             "msg": "Short URL not found",
             "type": "short.url.not.found",
             "error_code": CommonErrorCode.SHORT_URL_NOT_FOUND
+        },
+        CommonErrorCode.CUSTOM_URL_ALREADY_EXISTS: {
+            "msg": "Custom URL already exists",
+            "type": "custom.url.already.exists",
+            "error_code": CommonErrorCode.CUSTOM_URL_ALREADY_EXISTS
         }
     }
 

@@ -48,3 +48,20 @@ class CRUDUrl:
         db.commit()
         db.refresh(url_mapping)
         return url_mapping
+
+
+
+    def update_url_mapping(self, db: Session, url_mapping: UrlMapping) -> UrlMapping:
+        """
+        Update a UrlMapping object in the database.
+
+        Args:
+            db (Session): SQLAlchemy database session.
+            url_mapping (UrlMapping): The UrlMapping object to be updated.
+
+        Returns:
+            UrlMapping: The updated UrlMapping object.
+        """
+        db.commit()
+        db.refresh(url_mapping)
+        return url_mapping
