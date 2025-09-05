@@ -14,7 +14,9 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "prestart": "node -e \"const fs=require('fs');if(!fs.existsSync('.env')&&fs.existsSync('.env.sample')){fs.copyFileSync('.env.sample','.env');}\"",
     "start": "react-scripts start",
+    "prebuild": "node -e \"const fs=require('fs');if(!fs.existsSync('.env')&&fs.existsSync('.env.sample')){fs.copyFileSync('.env.sample','.env');}\"",
     "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"

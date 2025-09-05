@@ -18,7 +18,7 @@ function UrlShortener() {
     setShortUrl('');
 
     try {
-      const response = await fetch('http://localhost:8080/url-shortener/api/v1/generate', {
+      const response = await fetch(process.env.REACT_APP_API_URL + '/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

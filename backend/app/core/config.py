@@ -11,6 +11,7 @@ load_dotenv()
 class Settings(BaseSettings):
     API_V1_STR: str = "/url-shortener/api/v1"
     BACKEND_CORS_ORIGINS: List[str] = []
+    BACKEND_PORT: int = int(os.getenv("BACKEND_PORT", 8080))
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod

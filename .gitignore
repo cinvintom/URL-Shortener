@@ -19,8 +19,6 @@ htmlcov/
 .tox/
 .coverage
 .cache
-# Local env files
-.env.*
 # Alembic migration files
 alembic/versions/*.pyc
 # Logs
