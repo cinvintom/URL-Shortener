@@ -50,6 +50,10 @@ function UrlShortener() {
     alert('Short URL copied to clipboard!');
   };
 
+  const redirectToShortUrl = () => {
+    window.open(shortUrl, '_blank');
+  };
+
   return (
     <div className="container">
       <h1>URL Shortener</h1>
@@ -93,6 +97,16 @@ function UrlShortener() {
               value={shortUrl}
               readOnly
               className="short-url-input"
+              onClick={redirectToShortUrl}
+              style={{ cursor: 'pointer' }}
+              title="Click to redirect"
+              onMouseOver={(e) => {
+                e.target.setAttribute('title', 'Click to redirect');
+                e.target.style.backgroundColor = '#e0f7fa';
+              }}
+              onMouseOut={(e) => {
+                e.target.style.backgroundColor = 'transparent';
+              }}
             />
             <button 
               onClick={copyToClipboard}
