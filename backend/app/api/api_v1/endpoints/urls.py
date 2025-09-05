@@ -3,7 +3,7 @@ from typing import Dict
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_db
-from app.schemas.url import URLCreate
+from app.schemas.url import URLCreate, URLResponse
 from app.error_code.common_errors import CommonErrorCode
 from app.error_code.error_manager import error_manager
 from app.services.urls import UrlServices
@@ -12,7 +12,7 @@ from app.core.config import settings
 router = APIRouter()
 
 
-@router.post("/generate", response_model=Dict[str, str], status_code=status.HTTP_201_CREATED)
+@router.post("/generate", response_model=URLResponse, status_code=status.HTTP_201_CREATED)
 def create_url(
     *,
     db: Session = Depends(get_db),
@@ -25,11 +25,7 @@ def create_url(
     """
     try:
         url = UrlServices.create_url_mapping(db=db, url_in=url_in)
-        return {
-            "msg": "URL generated successfully",
-            "short_url": f"http://localhost:{settings.BACKEND_PORT}/{url.short_url}",
-            "original_url": url.original_url
-        }
+        return url
     except HTTPException as exc:
         raise exc
     except Exception as exc:
