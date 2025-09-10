@@ -13,18 +13,23 @@ crud_url = CRUDUrl()
 
 class UrlServices:
     @staticmethod
-    def check_if_url_exists(db: Session, url_in: URLCreate) -> bool:
+    def check_if_url_exists(db: Session, url_in: URLCreate) -> UrlMapping:
         """
-        Check if the URL exists in the database.
+        Check if the URL exists in the database, using cache for faster lookup.
 
         Args:
             db (Session): The database session.
             url_in (URLCreate): The URL creation schema containing the original URL.
 
         Returns:
-            bool: True if the URL exists, False otherwise.
+            UrlMapping: The UrlMapping object if found, else None.
         """
-        return crud_url.get_url_by_original_url(db=db, original_url=url_in.original_url) is not None
+        from app.utils.redis import cache_url
+        db_obj = crud_url.get_url_by_original_url(db=db, original_url=url_in.original_url)
+        if db_obj is not None:
+            cache_url(short_url=db_obj.short_url, original_url=db_obj.original_url)
+            return db_obj
+        return None
 
     @staticmethod
     def check_if_custom_url_exists(db: Session, short_url: str) -> None:
@@ -48,10 +53,8 @@ class UrlServices:
         Returns:
             UrlMapping: The created UrlMapping object.
         """
-        if UrlServices.check_if_url_exists(db=db, url_in=url_in):
-            db_obj = UrlServices.get_url_mapping_by_original_url(
-                db=db, original_url=url_in.original_url
-            )
+        db_obj = UrlServices.check_if_url_exists(db=db, url_in=url_in)
+        if db_obj:
             if url_in.short_url and url_in.url_type == UrlType.CUSTOM:
                 if db_obj.short_url != url_in.short_url:
                     UrlServices.check_if_custom_url_exists(

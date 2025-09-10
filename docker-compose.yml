@@ -11,7 +11,7 @@ services:
       - .env
     depends_on:
       - db
-      # - redis
+      - redis
     volumes:
       - ./backend:/backend
     networks:
@@ -25,6 +25,12 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - shortener-network
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - shortener-network
 
