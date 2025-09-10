@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: backend.dockerfile
+    ports:
+      - "8080:8080"
+    env_file:
+      - .env
+    depends_on:
+      - db
+    volumes:
+      - ./backend:/backend
+    networks:
+      - shortener-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: DockerfileDev
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+    networks:
+      - shortener-network
+
+  db:
+    image: postgres:15-alpine 
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - shortener-network
+
+networks:
+  shortener-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+
