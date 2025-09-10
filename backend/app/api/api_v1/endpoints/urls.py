@@ -5,6 +5,8 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 
+from prometheus_client import Counter, Histogram, generate_latest
+import time
 
 from app.api.deps import get_db
 from app.schemas.url import URLCreate, URLResponse, CustomURLAvailabilityResponse
@@ -13,6 +15,14 @@ from app.error_code.error_manager import error_manager
 from app.services.urls import UrlServices
 from app.core.config import settings
 
+# Prometheus metrics
+REQUEST_COUNT = Counter(
+    "url_requests_total", "Total URL requests", ["method", "endpoint"]
+)
+REQUEST_DURATION = Histogram(
+    "url_request_duration_seconds", "Request duration"
+)
+
 # Create FastAPI app instance for rate limiter setup
 limiter = Limiter(key_func=get_remote_address)
 app = FastAPI()
@@ -20,6 +30,17 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 router = APIRouter()
+
+
+@router.get("/metrics")
+def metrics():
+    """
+    Expose Prometheus metrics for monitoring.
+
+    Returns:
+        bytes: The latest Prometheus metrics in the default exposition format.
+    """
+    return generate_latest()
 
 @router.post(
     "/generate",
@@ -37,10 +58,20 @@ def create_url(
     request: Request = None
 ) -> Dict[str, str]:
     """
-    Generates a shortened URL for the provided original URL.
+    Generate a shortened URL for the provided original URL.
 
-    Accepts an original URL and an optional custom short URL or URL type.
+    This endpoint accepts an original URL and an optional custom short URL or URL type.
+    If the URL already exists, returns the existing mapping; otherwise, creates a new one.
+
+    Args:
+        db (Session): The database session dependency.
+        url_in (URLCreate): The URL creation schema containing the original and optional custom short URL.
+        request (Request, optional): The FastAPI request object.
+
+    Returns:
+        URLResponse: The response containing the short URL and original URL.
     """
+    start_time = time.time()
     try:
         url = UrlServices.create_url_mapping(db=db, url_in=url_in)
         return url
@@ -53,6 +84,11 @@ def create_url(
             error_code=CommonErrorCode.INTERNAL_SERVER_ERROR,
             error_message=f"An unexpected error occurred: {exc}"
         )
+    finally:
+        endpoint = "/generate"
+        method = "POST"
+        REQUEST_COUNT.labels(method=method, endpoint=endpoint).inc()
+        REQUEST_DURATION.observe(time.time() - start_time)
 
 
 @router.get(
@@ -69,11 +105,19 @@ def check_if_custom_url_exists(
 
 ) -> CustomURLAvailabilityResponse:
     """
-    Checks if the provided custom short URL is available.
+    Check if the provided custom short URL is available.
+
+    This endpoint verifies whether a given custom short URL is already in use.
+
+    Args:
+        db (Session): The database session dependency.
+        short_url (str): The custom short URL to check.
+        request (Request): The FastAPI request object.
 
     Returns:
         CustomURLAvailabilityResponse: Contains the short_url and its availability status.
     """
+    start_time = time.time()
     try:
         url = UrlServices.get_url_mapping_by_short_url(db=db, short_url=short_url)
         return CustomURLAvailabilityResponse(
@@ -89,3 +133,8 @@ def check_if_custom_url_exists(
             error_code=CommonErrorCode.INTERNAL_SERVER_ERROR,
             error_message=f"An unexpected error occurred: {exc}"
         )
+    finally:
+        endpoint = "/custom_url/available/{short_url}"
+        method = "GET"
+        REQUEST_COUNT.labels(method=method, endpoint=endpoint).inc()
+        REQUEST_DURATION.observe(time.time() - start_time)
