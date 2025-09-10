@@ -21,7 +21,14 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 router = APIRouter()
 
-@router.post("/generate", response_model=URLResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/generate",
+    response_model=URLResponse,
+    responses={
+        200: {"description": "URL already exists", "model": URLResponse},
+        201: {"description": "New URL created", "model": URLResponse},
+    },
+)
 @limiter.limit("10/minute")
 def create_url(
     *,

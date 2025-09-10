@@ -6,14 +6,13 @@ services:
       context: .
       dockerfile: backend.dockerfile
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     env_file:
       - .env
     depends_on:
       - db
       # - redis
     volumes:
-      # Mount the entire backend directory for live development
       - ./backend:/backend
     networks:
       - shortener-network

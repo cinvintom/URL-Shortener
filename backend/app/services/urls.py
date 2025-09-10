@@ -48,7 +48,6 @@ class UrlServices:
         Returns:
             UrlMapping: The created UrlMapping object.
         """
-        short_url_exists = False
         if UrlServices.check_if_url_exists(db=db, url_in=url_in):
             db_obj = UrlServices.get_url_mapping_by_original_url(
                 db=db, original_url=url_in.original_url
@@ -60,7 +59,11 @@ class UrlServices:
                     )
                     db_obj.short_url = url_in.short_url
                     crud_url.update_url_mapping(db=db, url_mapping=db_obj)
-            short_url_exists = True
+            return URLResponse(
+                status_code=200,
+                short_url=f"{settings.BACKEND_URL}/{db_obj.short_url}",
+                original_url=db_obj.original_url,
+            )
         else:
             if url_in.short_url and url_in.url_type == UrlType.CUSTOM:
                 UrlServices.check_if_custom_url_exists(
@@ -79,14 +82,13 @@ class UrlServices:
             db_url = UrlMapping(
                 original_url=url_in.original_url,
                 short_url=short_url,
-                url_type=url_in.url_type,
+                url_type=url_in.url_type
             )
             db_obj = crud_url.create_url_mapping(db=db, url_mapping=db_url)
         return URLResponse(
-            short_url=f"http://localhost:{settings.BACKEND_PORT}/{db_obj.short_url}",
+            status_code=201,
+            short_url=f"{settings.BACKEND_URL}/{db_obj.short_url}",
             original_url=db_obj.original_url,
-            is_short_url_exists=short_url_exists,
-            created_at=db_obj.created_at,
         )
 
     @staticmethod

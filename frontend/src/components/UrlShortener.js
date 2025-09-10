@@ -5,8 +5,6 @@ function UrlShortener() {
   const [shortUrl, setShortUrl] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [isShortUrlExists, setIsShortUrlExists] = useState(false);
-  const [updatedAt, setUpdatedAt] = useState('');
 
   // Custom URL states
   const [useCustomUrl, setUseCustomUrl] = useState(false);
@@ -64,8 +62,6 @@ function UrlShortener() {
 
       const data = await response.json();
       setShortUrl(data.short_url);
-      setIsShortUrlExists(data.is_short_url_exists);
-      setUpdatedAt(data.updated_at);
     } catch (err) {
       setError(err.message || 'An error occurred while shortening the URL');
     } finally {
@@ -90,8 +86,6 @@ function UrlShortener() {
 
   const clearForm = () => {
     setShortUrl('');
-    setIsShortUrlExists(false);
-    setUpdatedAt('');
     setUseCustomUrl(false);
     setCustomUrl('');
     setCustomUrlError('');
@@ -267,30 +261,6 @@ function UrlShortener() {
               Copy
             </button>
           </div>
-          {isShortUrlExists && (
-            <div
-              className="info-message"
-              style={{
-                marginTop: '8px',
-                color: '#888',
-                fontSize: '0.95em'
-              }}
-            >
-              {isShortUrlExists && customUrl ?
-                `Updated short URL with custom URL ` :
-                `Already generated short URL available`}
-              <div
-                style={{
-                  marginTop: '4px',
-                  color: '#888',
-                  fontSize: '0.6em',
-                  fontStyle: 'italic'
-                }}
-              >
-                Last updated at {updatedAt ? new Date(updatedAt + 'Z').toLocaleString() : ''}
-              </div>
-            </div>
-          )}
         </div>
       )}
     </div>
