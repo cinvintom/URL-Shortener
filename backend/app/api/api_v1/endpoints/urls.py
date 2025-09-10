@@ -1,6 +1,10 @@
-from fastapi import APIRouter, Depends, status, HTTPException
+from fastapi import APIRouter, Depends, status, HTTPException, FastAPI, Request
 from typing import Dict
 from sqlalchemy.orm import Session
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from slowapi.util import get_remote_address
+
 
 from app.api.deps import get_db
 from app.schemas.url import URLCreate, URLResponse, CustomURLAvailabilityResponse
@@ -9,14 +13,21 @@ from app.error_code.error_manager import error_manager
 from app.services.urls import UrlServices
 from app.core.config import settings
 
+# Create FastAPI app instance for rate limiter setup
+limiter = Limiter(key_func=get_remote_address)
+app = FastAPI()
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 router = APIRouter()
 
-
 @router.post("/generate", response_model=URLResponse, status_code=status.HTTP_201_CREATED)
+@limiter.limit("10/minute")
 def create_url(
     *,
     db: Session = Depends(get_db),
-    url_in: URLCreate
+    url_in: URLCreate,
+    request: Request = None
 ) -> Dict[str, str]:
     """
     Generates a shortened URL for the provided original URL.
@@ -42,10 +53,13 @@ def create_url(
     response_model=CustomURLAvailabilityResponse,
     status_code=status.HTTP_200_OK,
 )
+@limiter.limit("100/minute")
 def check_if_custom_url_exists(
     *,
     db: Session = Depends(get_db),
-    short_url: str
+    short_url: str,
+    request: Request
+
 ) -> CustomURLAvailabilityResponse:
     """
     Checks if the provided custom short URL is available.
