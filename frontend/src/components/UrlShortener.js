@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { Button } from 'antd';
 
 function UrlShortener() {
   const [originalUrl, setOriginalUrl] = useState('');
@@ -110,15 +111,17 @@ function UrlShortener() {
             onClick={() => newShortUrl()}
           />
         </div>
-
-        <button
-          type="submit"
+        
+        <Button
+          type="primary"
+          size="large"
           className="shorten-btn"
           disabled={loading}
-          onClick={() => { newShortUrl(); }}
+          htmlType="submit"
+          loading={loading}
         >
           {loading ? 'Shortening...' : 'Shorten URL'}
-        </button>
+        </Button>
       </form>
 
       {error && (
