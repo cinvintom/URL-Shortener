@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from app.utils.redis import cache_url, get_cached_url
+from fastapi import APIRouter, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 
@@ -13,14 +14,29 @@ router = APIRouter()
 
 
 @router.get("/{short_code}", response_class=RedirectResponse, status_code=307)
-def redirect_to_url(short_code: str, db: Session = Depends(get_db)) -> RedirectResponse:
+def redirect_to_url(
+    short_code: str,
+    db: Session = Depends(get_db)
+) -> RedirectResponse:
     """
     Redirect to the original URL based on the short code.
     """
+    cached_url = get_cached_url(short_code)
+    if cached_url is not None:
+        return RedirectResponse(
+            url=cached_url["original_url"],
+            status_code=307
+        )
+
     url_obj = crud_url.get_url_by_short_url(db=db, short_url=short_code)
-    if not url_obj:
+    if url_obj is None:
         raise error_manager.error_responder(
             status_code=404,
             error_code=CommonErrorCode.SHORT_URL_NOT_FOUND,
         )
-    return RedirectResponse(url=url_obj.original_url, status_code=307)
+
+    cache_url(short_code, url_obj.original_url)
+    return RedirectResponse(
+        url=url_obj.original_url,
+        status_code=307
+    )

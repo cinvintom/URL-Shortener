@@ -13,7 +13,7 @@ COPY ./backend /backend
 # Set PYTHONPATH to include the backend directory
 ENV PYTHONPATH=/backend
 
-EXPOSE 8080
+EXPOSE ${BACKEND_PORT}
 # Change working directory to backend and run from there
 WORKDIR /backend
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${BACKEND_PORT}"]

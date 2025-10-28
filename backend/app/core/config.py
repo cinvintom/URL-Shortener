@@ -12,7 +12,8 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/url-shortener/api/v1"
     BACKEND_CORS_ORIGINS: List[str] = []
     BACKEND_PORT: int = int(os.getenv("BACKEND_PORT", 8080))
-
+    BACKEND_HOST: str = os.getenv("BACKEND_HOST", "localhost")
+    BACKEND_URL: str = f"http://{BACKEND_HOST}:{BACKEND_PORT}"
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
     def assemble_cors_origins(
@@ -31,6 +32,8 @@ class Settings(BaseSettings):
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "")
     POSTGRES_PASSWORD: str = os.getenv("POSTGRES_PASSWORD", "")
     POSTGRES_DB: str = os.getenv("POSTGRES_DB", "")
+    REDIS_HOST: str = os.getenv("REDIS_HOST", "redis")
+    REDIS_PORT: int = int(os.getenv("REDIS_PORT", 6379))
     SQLALCHEMY_DATABASE_URI: Optional[PostgresDsn] = os.getenv(
         "SQLALCHEMY_DATABASE_URI"
     )

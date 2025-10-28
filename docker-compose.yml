@@ -6,14 +6,13 @@ services:
       context: .
       dockerfile: backend.dockerfile
     ports:
-      - "8080:8080"
+      - "${BACKEND_PORT}:${BACKEND_PORT}"
     env_file:
       - .env
     depends_on:
       - db
-      # - redis
+      - redis
     volumes:
-      # Mount the entire backend directory for live development
       - ./backend:/backend
     networks:
       - shortener-network
@@ -26,6 +25,12 @@ services:
       - "3000:3000"
     depends_on:
       - backend
+    networks:
+      - shortener-network
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - shortener-network
 
